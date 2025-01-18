@@ -1,40 +1,40 @@
 from flask import Blueprint, request, jsonify
-from models import get_form_data_collection
-from models.form_data import FormDataModel
+from services import get_speech_to_text_service, get_translation_service
 
 form_routes = Blueprint("form_routes", __name__)
 
-@form_routes.before_app_first_request
-def setup_model():
+@form_routes.route("/speech-to-text", methods=["POST"])
+def speech_to_text():
     """
-    Configura el modelo de datos del formulario antes de procesar las solicitudes.
+    Ruta para convertir audio a texto.
     """
-    mongo = request.app.config["MONGO"]
-    collection = get_form_data_collection(mongo)
-    form_routes.form_data_model = FormDataModel(collection)
-
-@form_routes.route("/submit-form", methods=["POST"])
-def submit_form():
-    """
-    Ruta para guardar datos del formulario.
-    """
-    data = request.json
-    if not data:
-        return jsonify({"error": "No data provided"}), 400
+    file = request.files.get("audio")
+    if not file:
+        return jsonify({"error": "No audio file provided"}), 400
 
     try:
-        form_id = form_routes.form_data_model.insert_form_data(data)
-        return jsonify({"message": "Form data saved", "id": form_id})
+        speech_service = get_speech_to_text_service()
+        text = speech_service.process_audio(file)
+        return jsonify({"text": text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@form_routes.route("/form-data", methods=["GET"])
-def get_all_form_data():
+@form_routes.route("/translate", methods=["POST"])
+def translate():
     """
-    Ruta para recuperar todos los datos del formulario.
+    Ruta para traducir texto entre idiomas.
     """
+    data = request.json
+    if not data or not all(key in data for key in ("text", "src_lang", "target_lang")):
+        return jsonify({"error": "Invalid input. Provide 'text', 'src_lang', and 'target_lang'."}), 400
+
     try:
-        data = form_routes.form_data_model.get_all_form_data()
-        return jsonify(data)
+        translation_service = get_translation_service()
+        translated_text = translation_service.translate_text(
+            text=data["text"],
+            src_lang=data["src_lang"],
+            target_lang=data["target_lang"],
+        )
+        return jsonify({"translated_text": translated_text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

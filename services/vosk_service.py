@@ -3,7 +3,7 @@ from vosk import Model, KaldiRecognizer
 import wave
 
 class SpeechToTextService:
-    def __init__(self, model_path="model"):
+    def __init__(self, model_path="vosk/models"):
         if not os.path.exists(model_path):
             raise FileNotFoundError("Vosk model not found.")
         self.model = Model(model_path)
