@@ -1,26 +1,40 @@
 from flask import Blueprint, request, jsonify
-from services.translation_service import TranslationService
+from models import get_form_data_collection
+from models.form_data import FormDataModel
 
 form_routes = Blueprint("form_routes", __name__)
 
-# Inicializar el servicio de traducción
-translator = TranslationService()
-
-@form_routes.route("/translate", methods=["POST"])
-def translate():
+@form_routes.before_app_first_request
+def setup_model():
     """
-    Ruta para traducir texto entre idiomas.
+    Configura el modelo de datos del formulario antes de procesar las solicitudes.
+    """
+    mongo = request.app.config["MONGO"]
+    collection = get_form_data_collection(mongo)
+    form_routes.form_data_model = FormDataModel(collection)
+
+@form_routes.route("/submit-form", methods=["POST"])
+def submit_form():
+    """
+    Ruta para guardar datos del formulario.
     """
     data = request.json
-    if not data or not all(key in data for key in ("text", "src_lang", "target_lang")):
-        return jsonify({"error": "Invalid input. Provide 'text', 'src_lang', and 'target_lang'."}), 400
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
 
     try:
-        translated_text = translator.translate_text(
-            text=data["text"],
-            src_lang=data["src_lang"],
-            target_lang=data["target_lang"],
-        )
-        return jsonify({"translated_text": translated_text})
-    except RuntimeError as e:
+        form_id = form_routes.form_data_model.insert_form_data(data)
+        return jsonify({"message": "Form data saved", "id": form_id})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@form_routes.route("/form-data", methods=["GET"])
+def get_all_form_data():
+    """
+    Ruta para recuperar todos los datos del formulario.
+    """
+    try:
+        data = form_routes.form_data_model.get_all_form_data()
+        return jsonify(data)
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
