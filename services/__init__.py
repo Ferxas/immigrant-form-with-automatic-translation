@@ -1,13 +1,27 @@
 from .vosk_service import SpeechToTextService
+from .translation_service import TranslationService
 
-# Ruta al modelo Vosk
-VOSK_MODEL_PATH = "models/vosk"
+# Configuración inicial
+DEFAULT_VOSK_MODEL_DIR = "vosk/models"
+DEFAULT_VOSK_MODEL_NAME = None  # default model, for example -> "model1"
 
-# Crear una instancia global del servicio de Speech-to-Text
-speech_to_text_service = SpeechToTextService(model_path=VOSK_MODEL_PATH)
+# Instancias globales si necesitas reutilizar servicios con configuraciones comunes
+translation_service = TranslationService()
 
-def get_speech_to_text_service():
+def get_translation_service():
+    """
+    Devuelve una instancia del servicio de traducción.
+    """
+    return translation_service
+
+def get_speech_to_text_service(model_name=None):
     """
     Devuelve una instancia del servicio de reconocimiento de voz.
+    
+    Args:
+        model_name (str, opcional): Nombre del modelo Vosk. Si no se especifica, usa el modelo por defecto.
+
+    Returns:
+        SpeechToTextService: Instancia del servicio.
     """
-    return speech_to_text_service
+    return SpeechToTextService(model_dir=DEFAULT_VOSK_MODEL_DIR, model_name=model_name)
