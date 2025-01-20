@@ -10,7 +10,7 @@ const Form = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  // Función para manejar la captura de audio y traducción
+  // handling audio and translation
   const handleSpeechToText = async (field) => {
     setLoading(true);
     try {

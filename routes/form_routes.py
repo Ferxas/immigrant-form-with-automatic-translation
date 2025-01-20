@@ -78,17 +78,14 @@ def speech_to_text_and_translate_live():
     Escucha desde el micrófono, detecta el idioma en tiempo real, transcribe y traduce al español.
     """
     try:
-        # Obtener servicios
         speech_service = get_speech_to_text_service()
         translation_service = get_translation_service()
 
-        # Escuchar, transcribir y detectar idioma
         text, detected_language = speech_service.listen_and_transcribe_with_language()
 
         if not detected_language:
             return jsonify({"error": "Unable to detect language."}), 400
 
-        # Traducir texto al español
         translated_text = translation_service.translate_text(
             text=text,
             src_lang=detected_language,

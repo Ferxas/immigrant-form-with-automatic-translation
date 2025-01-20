@@ -5,7 +5,7 @@ from .translation_service import TranslationService
 DEFAULT_VOSK_MODEL_DIR = "vosk/models"
 DEFAULT_VOSK_MODEL_NAME = None  # default model, for example -> "model1"
 
-# Instancias globales si necesitas reutilizar servicios con configuraciones comunes
+# Instancias globales solo si decido reutilizar servicios con configuraciones comunes
 translation_service = TranslationService()
 
 def get_translation_service():
