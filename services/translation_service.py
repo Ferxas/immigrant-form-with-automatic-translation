@@ -1,8 +1,17 @@
 from googletrans import Translator
+from langdetect import detect, DetectorFactory
+
+DetectorFactory.seed = 0
 
 class TranslationService:
     def __init__(self):
         self.translator = Translator()
+        
+    def detect_language(self, text):
+        try:
+            return detect(text)
+        except Exception as e:
+            raise RuntimeError(f"Error detecting language {e}")
 
     def translate_text(self, text, src_lang, target_lang):
         """

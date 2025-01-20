@@ -24,4 +24,4 @@ def get_speech_to_text_service(model_name=None):
     Returns:
         SpeechToTextService: Instancia del servicio.
     """
-    return SpeechToTextService(model_dir=DEFAULT_VOSK_MODEL_DIR, model_name=model_name)
+    return SpeechToTextService(model_path=DEFAULT_VOSK_MODEL_DIR, model_name=model_name)
